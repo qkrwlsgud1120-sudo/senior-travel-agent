@@ -16,6 +16,7 @@ import { enrichItineraryWithRoutes } from '../maps/routeEnrichment';
 import { deriveMobilityLevel, DAILY_WALKING_BUDGET_METERS } from '../maps/seniorAdjustment';
 import { attachLodgingOptions } from '../itinerary/lodgingRecommender';
 import { attachScheduledTimes } from '../itinerary/scheduleBuilder';
+import { attachRestaurantCandidates } from '../itinerary/restaurantCandidates';
 import { logger } from '../utils/logger';
 
 // Tried lowering this to 4 to cut retry cost, but a max_tokens-truncated
@@ -176,6 +177,11 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
   // turn (keyed by placeId) so a later propose_itinerary can still reference spots
   // found in an earlier iteration, even after a different search tool ran since.
   const knownCandidates = new Map<string, PlaceSearchResult>();
+  // category (Google's types[0]) is too unreliable to detect "is this a
+  // restaurant" — Google often returns a generic type like "establishment"
+  // first even for restaurants. Tracking by which search tool actually
+  // produced the placeId is exact.
+  const restaurantPlaceIds = new Set<string>();
   let finalText: string | undefined;
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
@@ -216,6 +222,7 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
 
       for (const result of results) {
         knownCandidates.set(result.placeId, result);
+        if (block.name === 'search_restaurants') restaurantPlaceIds.add(result.placeId);
       }
 
       // Claude only needs enough to pick and reason about a place — placeId to
@@ -284,6 +291,7 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
             continue;
           }
 
+          attachRestaurantCandidates(candidateItinerary, restaurantPlaceIds, knownCandidates);
           candidateItinerary.days.forEach((day) => attachScheduledTimes(day));
           await attachLodgingOptions(candidateItinerary, mapProvider);
           itinerary = candidateItinerary;

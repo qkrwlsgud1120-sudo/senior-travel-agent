@@ -63,13 +63,23 @@ export function DayTabView({ itinerary, dayNumber, actionable, onProceed, onAskQ
               {!activity.coordinates && <Tag tone="neutral">위치 정보 없음</Tag>}
             </div>
             <div style={{ fontWeight: 700, marginTop: '0.35rem' }}>{activity.name}</div>
-            {activity.rating !== undefined && (
+            {!activity.restaurantCandidates && activity.rating !== undefined && (
               <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-muted)' }}>
                 ⭐ {activity.rating.toFixed(1)}
                 {activity.userRatingsTotal !== undefined && ` (리뷰 ${activity.userRatingsTotal.toLocaleString()}개)`}
               </div>
             )}
             <div style={{ margin: '0.25rem 0' }}>{activity.description}</div>
+            {activity.restaurantCandidates && (
+              <ol style={{ margin: '0.4rem 0', paddingLeft: '1.3rem' }}>
+                {activity.restaurantCandidates.map((candidate, cIdx) => (
+                  <li key={candidate.placeId ?? cIdx} style={{ margin: '0.2rem 0' }}>
+                    {candidate.name}
+                    {candidate.rating !== undefined && ` (⭐ ${candidate.rating.toFixed(1)})`}
+                  </li>
+                ))}
+              </ol>
+            )}
             <WhyThisFitsYou rationale={activity.rationale} />
             <AccessibilityIcons info={activity.accessibility} />
           </div>

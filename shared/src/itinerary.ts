@@ -37,6 +37,13 @@ export interface AccessibilityInfo {
   notes?: string;
 }
 
+export interface RestaurantCandidate {
+  name: string;
+  rating?: number;
+  userRatingsTotal?: number;
+  placeId?: string;
+}
+
 export interface ItineraryActivity {
   timeOfDay: 'morning' | 'afternoon' | 'evening';
   name: string;
@@ -51,6 +58,11 @@ export interface ItineraryActivity {
   category?: string;
   scheduledTime?: string;
   estimatedDwellMinutes?: number;
+  // Present when this slot is a meal — a ranked list of nearby restaurant
+  // options (still within the day's walking budget) instead of one specific
+  // pick, since a single named restaurant overstates certainty the search
+  // data doesn't support.
+  restaurantCandidates?: RestaurantCandidate[];
 }
 
 export type TransportMode = 'walking' | 'transit' | 'driving';
