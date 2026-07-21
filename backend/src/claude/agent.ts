@@ -318,7 +318,12 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
     session.claudeHistory.push({ role: 'user', content: toolResults });
   }
 
-  if (finalText === undefined) {
+  // Checking falsy (not just `=== undefined`) matters: the loop above can
+  // legitimately break with finalText set to '' when Claude's last no-tool-use
+  // response has no text block. That case still needs the wrap-up call, since
+  // an empty assistantText reaches the frontend as a silent no-op (200 OK,
+  // nothing rendered, no error) — confusing for the user, not fail-soft at all.
+  if (!finalText) {
     const wrapUp = await anthropic.messages.create({
       model: env.CLAUDE_MODEL,
       max_tokens: 1024,
@@ -330,5 +335,10 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
     finalText = extractText(wrapUp.content);
   }
 
-  return { assistantText: finalText, itinerary, bookingSummaryDraft };
+  // Last-resort fallback in case even the wrap-up call comes back textless —
+  // never send the frontend an empty assistantText.
+  const assistantText =
+    finalText || (itinerary ? '일정을 준비했어요! 화면에서 확인해보세요.' : '네, 확인했어요. 더 궁금한 점 있으신가요?');
+
+  return { assistantText, itinerary, bookingSummaryDraft };
 }
