@@ -1,0 +1,19 @@
+name: Keep Render backend awake
+
+# Render's free tier spins the backend down after ~15 minutes with no
+# requests, and the next request pays a ~30-50s cold-start. Since this repo
+# is submitted for review at an unknown time (not a scheduled live demo),
+# there's no "warm it up beforehand" moment — so instead we just never let
+# it go idle. Pings every 10 minutes, comfortably under the 15-minute sleep
+# threshold, and within Render's free-tier monthly hour cap.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health check
+        run: curl -fsS --max-time 30 https://senior-travel-ai-backend.onrender.com/api/health

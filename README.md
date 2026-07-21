@@ -11,8 +11,8 @@
 **https://senior-travel-agent-frontend-dwp9.vercel.app/**
 
 - 프론트엔드: Vercel
-- 백엔드: Render (무료 플랜 — 15분 정도 요청이 없으면 잠들어서, 첫 접속 시 30~50초 정도
-  걸릴 수 있습니다. 이후엔 정상 속도로 응답합니다.)
+- 백엔드: Render (무료 플랜 — 15분간 요청이 없으면 슬립되는데, `.github/workflows/keep-alive.yml`이
+  10분 간격으로 헬스체크를 호출해 계속 깨어있게 유지합니다)
 - 배포 설정: 저장소 루트의 `render.yaml`(백엔드), `frontend/vercel.json`(프론트엔드,
   `/api/*` 요청을 Render 백엔드로 프록시)
 
