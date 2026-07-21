@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: senior-travel-ai-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm run build -w backend
+    startCommand: npm run start -w backend
+    envVars:
+      # Secrets — set the actual values in the Render dashboard, not here.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5
+      # Set to the deployed Vercel frontend URL once that's created.
+      - key: FRONTEND_ORIGIN
+        sync: false
