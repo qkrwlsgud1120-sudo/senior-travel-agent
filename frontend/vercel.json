@@ -1,6 +1,4 @@
 {
-  "buildCommand": "npm install && npm run build -w frontend",
-  "outputDirectory": "frontend/dist",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://senior-travel-ai-backend.onrender.com/api/:path*" }
   ]
