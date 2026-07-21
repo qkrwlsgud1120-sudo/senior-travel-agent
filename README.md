@@ -20,6 +20,16 @@
   외부 rewrite 프록시는 약 120초에서 요청을 강제 종료해서(`ROUTER_EXTERNAL_TARGET_ERROR`)
   긴 요청이 502로 실패했습니다.
 
+## 스크린샷
+
+| STEP1 인터뷰 | STEP2 성향 분석 |
+|---|---|
+| ![STEP1 인터뷰](docs/screenshots/01-step1-interview.png) | ![STEP2 성향 분석](docs/screenshots/02-step2-profile.png) |
+
+| 대화 흐름 | Day별 상세 (Mobility Score · 지도 · AI Hotel Manager) |
+|---|---|
+| ![대화 흐름](docs/screenshots/03-conversation.png) | ![Day 탭](docs/screenshots/04-day-tab.png) |
+
 ## 주요 기능
 
 - **STEP1 구조화 인터뷰 → STEP2 성향 분석 요약**: 대화 초반에 나이대·보행 가능 시간·선호
