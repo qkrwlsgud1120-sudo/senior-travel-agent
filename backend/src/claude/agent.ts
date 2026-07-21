@@ -123,12 +123,24 @@ function withCacheBreakpoint(messages: Anthropic.MessageParam[]): Anthropic.Mess
   const blocks = typeof last.content === 'string' ? [{ type: 'text' as const, text: last.content }] : [...last.content];
   if (blocks.length === 0) return messages;
 
-  // This app never enables extended thinking, so history blocks are always
-  // text/tool_use/tool_result — all of which support cache_control at runtime,
-  // even though TS can't narrow the union to confirm that here.
-  const lastBlockIndex = blocks.length - 1;
-  blocks[lastBlockIndex] = {
-    ...blocks[lastBlockIndex],
+  // cache_control isn't a permitted field on thinking/redacted_thinking blocks.
+  // Claude Sonnet 5 runs adaptive thinking by default even though we never set
+  // `thinking` ourselves, so a thinking block can legitimately be the last
+  // block of a history entry — tagging it crashed every call afterward with
+  // "Extra inputs are not permitted". Walk backward to the last block that can
+  // actually carry a cache breakpoint; if the whole message is thinking blocks
+  // (rare), skip caching for just this one call instead of sending a bad request.
+  let cacheableIndex = -1;
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    if (blocks[i].type !== 'thinking' && blocks[i].type !== 'redacted_thinking') {
+      cacheableIndex = i;
+      break;
+    }
+  }
+  if (cacheableIndex === -1) return messages;
+
+  blocks[cacheableIndex] = {
+    ...blocks[cacheableIndex],
     cache_control: { type: 'ephemeral' },
   } as Anthropic.ContentBlockParam;
 
