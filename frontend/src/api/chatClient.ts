@@ -7,7 +7,17 @@ import type {
   ConfirmBookingResponse,
 } from '@travel-ai/shared';
 
-async function postJson<TResponse>(url: string, body: unknown): Promise<TResponse> {
+// Local dev: empty string, so requests stay relative and go through Vite's
+// dev-server proxy (vite.config.ts) to localhost:3001.
+// Deployed: set to the Render backend's URL so the browser calls it directly.
+// Deliberately NOT proxied through Vercel's rewrites — itinerary generation
+// can take 1-2 minutes (multiple Claude tool-use iterations + route lookups),
+// and Vercel's external-rewrite proxy hard-cuts requests at ~120s
+// (ROUTER_EXTERNAL_TARGET_ERROR), which a direct cross-origin call avoids.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+
+async function postJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
+  const url = `${API_BASE_URL}${path}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

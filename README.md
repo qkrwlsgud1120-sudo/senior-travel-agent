@@ -13,8 +13,12 @@
 - 프론트엔드: Vercel
 - 백엔드: Render (무료 플랜 — 15분간 요청이 없으면 슬립되는데, `.github/workflows/keep-alive.yml`이
   10분 간격으로 헬스체크를 호출해 계속 깨어있게 유지합니다)
-- 배포 설정: 저장소 루트의 `render.yaml`(백엔드), `frontend/vercel.json`(프론트엔드,
-  `/api/*` 요청을 Render 백엔드로 프록시)
+- 배포 설정: 저장소 루트의 `render.yaml`(백엔드), `frontend/vercel.json`(프론트엔드)
+- 프론트엔드는 Render 백엔드를 **직접(CORS)** 호출합니다(`VITE_API_BASE_URL`,
+  `frontend/src/api/chatClient.ts`) — Vercel의 rewrite 프록시는 쓰지 않습니다. 일정
+  생성/수정 요청이 Claude를 여러 번 반복 호출해 1~2분씩 걸릴 때가 있는데, Vercel의
+  외부 rewrite 프록시는 약 120초에서 요청을 강제 종료해서(`ROUTER_EXTERNAL_TARGET_ERROR`)
+  긴 요청이 502로 실패했습니다.
 
 ## 주요 기능
 
