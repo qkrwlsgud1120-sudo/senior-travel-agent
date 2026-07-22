@@ -7,6 +7,7 @@ export interface Step1Answers {
   pace?: string;
   freeTime?: string;
   lodgingChange?: string;
+  dayEndTime?: string;
 }
 
 const AGE_GROUP_MAP: Record<string, TravelerPreferences['ageGroup']> = {
@@ -105,6 +106,7 @@ export function mapAnswersToConstraints(answers: Step1Answers): {
       pacePreference: answers.pace ? PACE_MAP[answers.pace] : undefined,
       freeTimeImportance: answers.freeTime ? FREE_TIME_MAP[answers.freeTime] : undefined,
       lodgingChangeTolerance: answers.lodgingChange ? LODGING_CHANGE_MAP[answers.lodgingChange] : undefined,
+      dayEndTime: answers.dayEndTime,
     },
   };
 }

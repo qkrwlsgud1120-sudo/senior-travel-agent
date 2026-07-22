@@ -21,6 +21,7 @@ export interface TravelerPreferences {
   ageGroup?: '50s' | '60s' | '70sPlus';
   pacePreference?: 'relaxed' | 'moderate' | 'packed';
   freeTimeImportance?: 'high' | 'medium' | 'low';
+  dayEndTime?: string;
 }
 
 export interface Coordinates {

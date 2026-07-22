@@ -344,8 +344,11 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
             continue;
           }
 
-          attachRestaurantCandidates(candidateItinerary, restaurantPlaceIds, knownCandidates);
+          // Must run before attachRestaurantCandidates: the lunch/dinner label
+          // is decided from the real scheduledTime, not Claude's loose
+          // timeOfDay guess.
           candidateItinerary.days.forEach((day) => attachScheduledTimes(day));
+          attachRestaurantCandidates(candidateItinerary, restaurantPlaceIds, knownCandidates);
           await attachLodgingOptions(candidateItinerary, mapProvider);
           itinerary = candidateItinerary;
           session.latestItinerary = itinerary;

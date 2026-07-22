@@ -1,5 +1,5 @@
 export interface Step1Question {
-  key: 'ageGroup' | 'walkingHours' | 'style' | 'pace' | 'freeTime' | 'lodgingChange';
+  key: 'ageGroup' | 'walkingHours' | 'style' | 'pace' | 'freeTime' | 'lodgingChange' | 'dayEndTime';
   question: string;
   options: string[];
   multiSelect: boolean;
@@ -40,6 +40,12 @@ export const STEP1_QUESTIONS: Step1Question[] = [
     key: 'lodgingChange',
     question: '숙소를 옮기는 것도 괜찮으세요?',
     options: ['옮기고 싶지 않아요', '한 번은 괜찮아요', '상관없어요'],
+    multiSelect: false,
+  },
+  {
+    key: 'dayEndTime',
+    question: '하루 일정은 몇 시쯤 마무리하고 싶으세요?',
+    options: ['17시', '18시', '19시 이후'],
     multiSelect: false,
   },
 ];

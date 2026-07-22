@@ -63,6 +63,7 @@ function seedClaudeHistoryWithProfile(session: SessionState, answers: Step1Answe
     `여행 강도: ${answers.pace ?? '미상'}`,
     `자유시간 필요도: ${answers.freeTime ?? '미상'}`,
     `숙소 이동 허용: ${answers.lodgingChange ?? '미상'}`,
+    `하루 일정 마무리 희망 시각: ${answers.dayEndTime ?? '미상'}`,
   ];
 
   session.claudeHistory.push({
