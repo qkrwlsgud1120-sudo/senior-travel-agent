@@ -28,11 +28,17 @@
 
 | STEP1 인터뷰 | STEP2 성향 분석 |
 |---|---|
-| ![STEP1 인터뷰](docs/screenshots/01-step1-interview.png) | ![STEP2 성향 분석](docs/screenshots/02-step2-profile.png) |
+| <img src="docs/screenshots/01-step1-interview.png" width="360" /> | <img src="docs/screenshots/02-step2-profile.png" width="360" /> |
 
-| 대화 흐름 | Day별 상세 (Mobility Score · 지도 · AI Hotel Manager) |
+**대화 흐름** (STEP2 확인 → 목적지/이동수단/예산 질문 → 일정 완성)
+
+<img src="docs/screenshots/03-conversation.png" width="360" />
+
+**Day별 상세** — Mobility Score · 실제 이동시간 기반 시간대별 동선 · 식당 후보 · AI Hotel Manager
+
+| Day 1 (오페라하우스 · 왕립식물원) | Day 7 (퀸빅토리아빌딩 · 마무리 쇼핑) |
 |---|---|
-| ![대화 흐름](docs/screenshots/03-conversation.png) | ![Day 탭](docs/screenshots/04-day-tab.png) |
+| <img src="docs/screenshots/05-day1.png" width="360" /> | <img src="docs/screenshots/06-day7.png" width="360" /> |
 
 ## 주요 기능
 
