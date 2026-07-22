@@ -296,23 +296,51 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
             (day) => (day.dailyBurdenSummary?.totalDistanceMeters ?? 0) > DAILY_WALKING_BUDGET_METERS[mobilityLevel]
           );
 
+          // The system prompt asks Claude to source meal activities from
+          // search_restaurants, but that's a request, not a guarantee — Claude
+          // sometimes still picks a restaurant from general knowledge or the
+          // tourist-spot search, which silently skips the restaurant-candidates
+          // display (attachRestaurantCandidates only fires for placeIds that
+          // actually came from search_restaurants). Enforce it the same way
+          // the walking-budget check is enforced: reject and ask for a retry.
+          const daysMissingSearchedMeal = candidateItinerary.days.filter(
+            (day) => !day.activities.some((a) => a.placeId && restaurantPlaceIds.has(a.placeId))
+          );
+
           // SKIP_BUDGET_VALIDATION (dev-only) accepts the first attempt as-is,
           // skipping the retry loop that's the single biggest cost driver per
           // turn. dailyBurdenSummary is still computed honestly either way —
           // this only skips asking Claude to regenerate, not the scoring itself.
-          if (!env.SKIP_BUDGET_VALIDATION && overBudgetDays.length > 0 && iteration < MAX_TOOL_ITERATIONS - 1) {
-            const detail = overBudgetDays
-              .map((day) => {
-                const km = ((day.dailyBurdenSummary?.totalDistanceMeters ?? 0) / 1000).toFixed(1);
-                const budgetKm = (DAILY_WALKING_BUDGET_METERS[mobilityLevel] / 1000).toFixed(1);
-                return `${day.dayNumber}일차: 약 ${km}km (예산 ${budgetKm}km)`;
-              })
-              .join(', ');
-            resultsById.set(
-              block.id,
-              `일부 날짜가 도보 예산을 초과했습니다: ${detail}. 활동 수를 줄이거나 지리적으로 가까운 곳끼리 묶어서 ` +
-                '지금 바로 propose_itinerary를 다시 호출하세요. 사용자에게 설명하는 텍스트로 먼저 답하지 말고, 곧바로 도구를 다시 호출하세요.'
+          const needsRetry =
+            !env.SKIP_BUDGET_VALIDATION &&
+            (overBudgetDays.length > 0 || daysMissingSearchedMeal.length > 0) &&
+            iteration < MAX_TOOL_ITERATIONS - 1;
+
+          if (needsRetry) {
+            const messageParts: string[] = [];
+            if (overBudgetDays.length > 0) {
+              const detail = overBudgetDays
+                .map((day) => {
+                  const km = ((day.dailyBurdenSummary?.totalDistanceMeters ?? 0) / 1000).toFixed(1);
+                  const budgetKm = (DAILY_WALKING_BUDGET_METERS[mobilityLevel] / 1000).toFixed(1);
+                  return `${day.dayNumber}일차: 약 ${km}km (예산 ${budgetKm}km)`;
+                })
+                .join(', ');
+              messageParts.push(
+                `일부 날짜가 도보 예산을 초과했습니다: ${detail}. 활동 수를 줄이거나 지리적으로 가까운 곳끼리 묶으세요.`
+              );
+            }
+            if (daysMissingSearchedMeal.length > 0) {
+              const dayNums = daysMissingSearchedMeal.map((day) => day.dayNumber).join(', ');
+              messageParts.push(
+                `${dayNums}일차에 search_restaurants 결과에서 고른 식당 활동이 없습니다. ` +
+                  'search_restaurants를 호출해서 나온 후보의 placeId로 점심/저녁 활동을 채우세요.'
+              );
+            }
+            messageParts.push(
+              '지금 바로 propose_itinerary를 다시 호출하세요. 사용자에게 설명하는 텍스트로 먼저 답하지 말고, 곧바로 도구를 다시 호출하세요.'
             );
+            resultsById.set(block.id, messageParts.join(' '));
             continue;
           }
 
