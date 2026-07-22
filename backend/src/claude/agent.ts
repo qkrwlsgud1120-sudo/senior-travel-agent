@@ -208,6 +208,13 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
     const response = await anthropic.messages.create({
       model: env.CLAUDE_MODEL,
       max_tokens: 8192,
+      // Explicitly off, not omitted: Claude Sonnet 5 runs adaptive thinking by
+      // default when this is left out, and thinking blocks kept causing
+      // downstream 400s when combined with caching/history (cache_control not
+      // permitted on them, can't be the final block when replayed, etc.). This
+      // app never surfaces reasoning to the user, so there's no reason to eat
+      // that whole class of bugs for a feature we don't use.
+      thinking: { type: 'disabled' },
       system: cacheableSystem(session.phase),
       tools: tools.length > 0 ? tools : undefined,
       messages: withCacheBreakpoint(session.claudeHistory),
@@ -365,6 +372,7 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
     const wrapUp = await anthropic.messages.create({
       model: env.CLAUDE_MODEL,
       max_tokens: 1024,
+      thinking: { type: 'disabled' },
       system: cacheableSystem(session.phase),
       messages: withCacheBreakpoint(session.claudeHistory),
     });
