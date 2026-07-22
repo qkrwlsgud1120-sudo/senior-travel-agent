@@ -11,8 +11,12 @@
 **https://senior-travel-agent-frontend-dwp9.vercel.app/**
 
 - 프론트엔드: Vercel
-- 백엔드: Render (무료 플랜 — 15분간 요청이 없으면 슬립되는데, `.github/workflows/keep-alive.yml`이
-  10분 간격으로 헬스체크를 호출해 계속 깨어있게 유지합니다)
+- 백엔드: Render (무료 플랜 — 15분간 요청이 없으면 슬립됩니다). **UptimeRobot**이
+  `/api/health`을 5분 간격으로 호출해 계속 깨어있게 유지합니다. (참고: 처음엔
+  `.github/workflows/keep-alive.yml`로 GitHub Actions cron을 썼는데, GitHub의
+  스케줄 실행이 짧은 간격(5~10분)에서 안정적이지 않아서 — 10분 설정인데 실제로는
+  4시간 가까이 안 돈 적도 있음 — 전용 모니터링 서비스로 바꿨습니다. 워크플로우
+  파일은 해가 없어 남겨뒀지만, 실제로 깨어있게 하는 건 UptimeRobot입니다.)
 - 배포 설정: 저장소 루트의 `render.yaml`(백엔드), `frontend/vercel.json`(프론트엔드)
 - 프론트엔드는 Render 백엔드를 **직접(CORS)** 호출합니다(`VITE_API_BASE_URL`,
   `frontend/src/api/chatClient.ts`) — Vercel의 rewrite 프록시는 쓰지 않습니다. 일정
