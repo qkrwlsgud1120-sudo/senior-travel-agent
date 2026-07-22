@@ -148,6 +148,24 @@ function withCacheBreakpoint(messages: Anthropic.MessageParam[]): Anthropic.Mess
   return [...messages.slice(0, lastIndex), { ...last, content: blocks }];
 }
 
+// A response can be cut off by max_tokens right after a thinking block,
+// before any text/tool_use follows. The API rejects any future request whose
+// history includes an assistant message ending in a thinking block ("The
+// final block in an assistant message cannot be `thinking`"), so strip
+// trailing thinking blocks before persisting a turn into history. If that
+// empties the message entirely (the whole truncated response was thinking),
+// substitute a minimal placeholder rather than store an empty content array.
+function sanitizeForHistory(content: Anthropic.ContentBlock[]): Anthropic.ContentBlock[] {
+  const trimmed = [...content];
+  while (trimmed.length > 0 && trimmed[trimmed.length - 1].type === 'thinking') {
+    trimmed.pop();
+  }
+  if (trimmed.length === 0) {
+    return [{ type: 'text', text: '...' } as Anthropic.ContentBlock];
+  }
+  return trimmed;
+}
+
 function logUsage(usage: Anthropic.Usage): void {
   logger.info(
     `claude usage — input:${usage.input_tokens} output:${usage.output_tokens} ` +
@@ -196,7 +214,7 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
     });
     logUsage(response.usage);
 
-    session.claudeHistory.push({ role: 'assistant', content: response.content });
+    session.claudeHistory.push({ role: 'assistant', content: sanitizeForHistory(response.content) });
 
     const toolUseBlocks = response.content.filter(
       (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
@@ -351,7 +369,7 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
       messages: withCacheBreakpoint(session.claudeHistory),
     });
     logUsage(wrapUp.usage);
-    session.claudeHistory.push({ role: 'assistant', content: wrapUp.content });
+    session.claudeHistory.push({ role: 'assistant', content: sanitizeForHistory(wrapUp.content) });
     finalText = extractText(wrapUp.content);
   }
 
