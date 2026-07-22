@@ -304,6 +304,16 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
             throw new Error('malformed propose_itinerary input: itinerary.days missing or not an array');
           }
 
+          // Same class of issue as constraints.mobility below: the tool
+          // isn't strict-mode enforced, so a day can come back without
+          // `activities` even though the schema marks it required. Normalize
+          // once here rather than guard every downstream .map/.filter call.
+          for (const day of input.itinerary.days) {
+            if (!Array.isArray(day.activities)) {
+              day.activities = [];
+            }
+          }
+
           const candidateItinerary: Itinerary = {
             ...input.itinerary,
             constraints: input.constraints,
