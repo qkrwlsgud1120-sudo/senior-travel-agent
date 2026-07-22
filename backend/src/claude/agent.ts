@@ -181,6 +181,22 @@ function applyStep1Defaults(itinerary: Itinerary, session: SessionState): void {
   if (session.step1Preferences) {
     itinerary.preferences = { ...session.step1Preferences, ...itinerary.preferences };
   }
+
+  // Claude's tool_use input isn't schema-enforced at runtime (the tool isn't
+  // declared with strict: true), so `constraints`/`constraints.mobility` can
+  // be missing even though the tool schema marks them required — seen on a
+  // real revision call ("Cannot read properties of undefined (reading
+  // 'map')"). Never assume they exist.
+  if (!itinerary.constraints) {
+    itinerary.constraints = { mobility: [], healthConsiderations: [] };
+  }
+  if (!itinerary.constraints.mobility) {
+    itinerary.constraints.mobility = [];
+  }
+  if (!itinerary.constraints.healthConsiderations) {
+    itinerary.constraints.healthConsiderations = [];
+  }
+
   if (session.step1Constraints?.mobility?.length) {
     const existingDescriptions = new Set(itinerary.constraints.mobility.map((m) => m.description));
     const merged = session.step1Constraints.mobility.filter((m) => !existingDescriptions.has(m.description));
