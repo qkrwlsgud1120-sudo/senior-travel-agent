@@ -28,7 +28,7 @@
 
 | STEP1 인터뷰 | STEP2 성향 분석 |
 |---|---|
-| <img src="docs/screenshots/01-step1-interview.png" width="360" /> | <img src="docs/screenshots/02-step2-profile.png" width="360" /> |
+| <img src="docs/screenshots/01-step1-interview.png" height="520" /> | <img src="docs/screenshots/02-step2-profile.png" height="520" /> |
 
 **대화 흐름** (STEP2 확인 → 목적지/이동수단/예산 질문 → 일정 완성)
 
@@ -38,7 +38,7 @@
 
 | Day 1 (오페라하우스 · 왕립식물원) | Day 7 (퀸빅토리아빌딩 · 마무리 쇼핑) |
 |---|---|
-| <img src="docs/screenshots/05-day1.png" width="360" /> | <img src="docs/screenshots/06-day7.png" width="360" /> |
+| <img src="docs/screenshots/05-day1.png" height="520" /> | <img src="docs/screenshots/06-day7.png" height="520" /> |
 
 ## 주요 기능
 
