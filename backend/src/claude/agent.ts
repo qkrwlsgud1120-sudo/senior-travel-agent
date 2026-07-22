@@ -207,7 +207,15 @@ export async function runAgentTurn(session: SessionState): Promise<AgentTurnResu
 
     const response = await anthropic.messages.create({
       model: env.CLAUDE_MODEL,
-      max_tokens: 8192,
+      // propose_itinerary must resend the ENTIRE itinerary every call (no
+      // partial diffs), so longer trips (6-7+ days) with rich per-activity
+      // detail (description/rationale/accessibility/restaurantCandidates) can
+      // exceed 8192 tokens and get cut off mid-JSON — every retry then fails
+      // the same "itinerary.days missing or not an array" way, since the
+      // response is truncated, not actually malformed. 16000 stays within the
+      // non-streaming-safe ceiling (higher risks SDK HTTP timeouts) while
+      // giving multi-day itineraries enough room.
+      max_tokens: 16000,
       // Explicitly off, not omitted: Claude Sonnet 5 runs adaptive thinking by
       // default when this is left out, and thinking blocks kept causing
       // downstream 400s when combined with caching/history (cache_control not
